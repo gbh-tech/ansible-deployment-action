@@ -10,7 +10,7 @@ inputs:
     description: 'Ansible vault password to decrypt secrets'
     required: true
   dry_run:
-    default: true
+    default: "true"
     description: 'Whenever to run Ansible on check mode'
     required: true
   aws_region:
@@ -35,9 +35,6 @@ env:
 runs:
   using: "composite"
   steps:
-    - name: 💻 Checkout current code ref
-      uses: actions/checkout@v4
-
     - name: 🔑 Configure AWS service account credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -69,19 +66,6 @@ runs:
 
         sed -i "/- hosts:/a\  no_log: yes" playbooks/site.yml
 
-    - name: 🔧 Set Ansible configuration and dry run options
-      shell: bash -leo pipefail {0}
-      working-directory: ansible
-      run: |
-        set_env() { echo "$1" >> $GITHUB_ENV; }
-        tags="${{ inputs.ansible_tags }}"
-
-        # Set the IFS to comma (,) to split the string based on comma
-        IFS=','
-
-        read -ra array <<< "$tags"
-        set_env "ansible_tags=${array[@]}"
-
     - name: 🔐 Add Ansible vault password to vault key file
       shell: bash -leo pipefail {0}
       working-directory: ansible
@@ -90,12 +74,14 @@ runs:
     - name: 🚀 Running Ansible tasks
       shell: bash -leo pipefail {0}
       working-directory: ansible
-      run:
-        run: |
-          for tag in ${{ env.ansible_tags }}
+      run: |
+        tags="${{ inputs.ansible_tags }}"
+
+        # Set the IFS to comma (,) to split the string based on comma
+        IFS=','
+
+        read -ra array <<< "$tags"
+        for tag in ${array[@]}
           do
-            echo  "Running ${tag} step:"
-            ansible-playbook
-            playbooks/${{ inputs.environment }}.yml
-            -t ${tag}
+            ansible-playbook playbooks/${{ inputs.environment }}.yml -t $tag ${{ env.OPTS }}
           done
