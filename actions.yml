@@ -1,0 +1,101 @@
+name: 'Ansible Deployment Action'
+description: 'Configures base runner and runs deployment playbooks using Ansible.'
+author: "GBH"
+
+inputs:
+  environment:
+    description: 'Target environment to deploy'
+    required: true
+  ansible_vault_password:
+    description: 'Ansible vault password to decrypt secrets'
+    required: true
+  dry_run:
+    default: true
+    description: 'Whenever to run Ansible on check mode'
+    required: true
+  aws_region:
+    description: 'AWS runner region'
+    default: 'us-east-1'
+    required: false
+  aws_access_key_id:
+    description: 'AWS service account access key'
+    required: true
+  aws_secret_access_key:
+    description: 'AWS service account secret access key'
+    required: true
+  ansible_tags:
+    description: ''
+    required: true
+    default: info
+
+env:
+  ANSIBLE_FORCE_COLOR: '1'
+  PY_COLORS: '1'
+
+runs:
+  using: "composite"
+  steps:
+    - name: 💻 Checkout current code ref
+      uses: actions/checkout@v4
+
+    - name: 🔑 Configure AWS service account credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{ inputs.aws_region }}
+        aws-access-key-id: ${{ inputs.aws_access_key_id }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+
+    - name: 📦 Install deployment system dependencies
+      shell: bash -leo pipefail {0}
+      run:
+        pip install --upgrade
+        ansible
+        ansible-lint
+        awscli
+        kubernetes
+
+    - name: 🔧 Set Ansible configuration and dry run options
+      shell: bash -leo pipefail {0}
+      working-directory: ansible
+      run: |
+        set_env() { echo "$1" >> $GITHUB_ENV; }
+        echo "Dry Run set to: ${{ inputs.dry_run }}"
+
+        if [ "${{ inputs.dry_run }}" == "true" ]; then
+          set_env "OPTS=--check"
+        else
+          set_env "OPTS="
+        fi
+
+        sed -i "/- hosts:/a\  no_log: yes" playbooks/site.yml
+
+    - name: 🔧 Set Ansible configuration and dry run options
+      shell: bash -leo pipefail {0}
+      working-directory: ansible
+      run: |
+        set_env() { echo "$1" >> $GITHUB_ENV; }
+        tags="${{ inputs.ansible_tags }}"
+
+        # Set the IFS to comma (,) to split the string based on comma
+        IFS=','
+
+        read -ra array <<< "$tags"
+        set_env "ansible_tags=${array[@]}"
+
+    - name: 🔐 Add Ansible vault password to vault key file
+      shell: bash -leo pipefail {0}
+      working-directory: ansible
+      run: echo "${{ inputs.ansible_vault_password }}" > vault.key
+
+    - name: 🚀 Running Ansible tasks
+      shell: bash -leo pipefail {0}
+      working-directory: ansible
+      run:
+        run: |
+          for tag in ${{ env.ansible_tags }}
+          do
+            echo  "Running ${tag} step:"
+            ansible-playbook
+            playbooks/${{ inputs.environment }}.yml
+            -t ${tag}
+          done
