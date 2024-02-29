@@ -1,6 +1,9 @@
 name: 'Ansible Deployment Action'
 description: 'Configures base runner and runs deployment playbooks using Ansible.'
 author: 'gbh-tech'
+branding:
+  icon: 'book'
+  color: 'green'
 
 inputs:
   playbook_path:

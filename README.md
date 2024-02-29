@@ -41,7 +41,7 @@ See [action.yml](action.yml)
 Example usage:
 
 ```yaml
-- uses: actions/ansible-deployment@v1
+- uses: gbh-tech/ansible-deployment@v1
   with:
     playbook_path: 'playbooks'
     playbook_name: 'stage.yaml'
