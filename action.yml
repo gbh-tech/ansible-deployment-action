@@ -1,0 +1,90 @@
+name: 'Ansible Deployment Action'
+description: 'Configures base runner and runs deployment playbooks using Ansible.'
+author: 'gbh-tech'
+
+inputs:
+  playbook_path:
+    description: 'The location of the playbook'
+    required: false
+    default: '.'
+  playbook_name:
+    description: 'The playbook file name'
+    required: true
+  ansible_vault_password:
+    description: 'Ansible vault password to decrypt secrets'
+    required: true
+  dry_run:
+    description: 'Whenever to run Ansible on check mode'
+    required: false
+    default: 'true'
+  aws_region:
+    description: 'AWS runner region'
+    required: true
+  aws_access_key_id:
+    description: 'AWS service account access key'
+    required: true
+  aws_secret_access_key:
+    description: 'AWS service account secret access key'
+    required: true
+  ansible_tags:
+    description: 'A comma-separated string of tags to filter which tasks to run in the playbook'
+    required: true
+    default: 'kubeconfig,info'
+
+env:
+  ANSIBLE_FORCE_COLOR: '1'
+  PY_COLORS: '1'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure AWS service account credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{ inputs.aws_region }}
+        aws-access-key-id: ${{ inputs.aws_access_key_id }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+
+    - name: Install deployment system dependencies
+      shell: bash -leo pipefail {0}
+      run:
+        pip install --upgrade
+        ansible
+        ansible-lint
+        awscli
+        kubernetes
+
+    - name: Set Ansible configuration and dry run options
+      shell: bash -leo pipefail {0}
+      working-directory: ansible
+      run: |
+        set_env() { echo "$1" >> $GITHUB_ENV; }
+        echo "Dry Run set to: ${{ inputs.dry_run }}"
+
+        if [ "${{ inputs.dry_run }}" == "true" ]; then
+          set_env "OPTS=--check"
+        else
+          set_env "OPTS="
+        fi
+
+        sed -i "/- hosts:/a\  no_log: yes" playbooks/site.yml
+
+    - name: Add Ansible vault password to vault key file
+      shell: bash -leo pipefail {0}
+      working-directory: ansible
+      run: echo "${{ inputs.ansible_vault_password }}" > vault.key
+
+    - name: Running Ansible tasks
+      shell: bash -leo pipefail {0}
+      working-directory: ansible
+      run: |
+        tags="${{ inputs.ansible_tags }}"
+
+        # Set the IFS to comma (,) to split the string based on comma
+        IFS=','
+
+        read -ra array <<< "$tags"
+        for tag in ${array[@]}
+          do
+            ansible-playbook ${{ inputs.playbook_path }}/${{ inputs.playbook_name }}.yml -t $tag ${{ env.OPTS }}
+          done
