@@ -1,6 +1,6 @@
 name: 'Ansible Deployment Action'
 description: 'Configures base runner and runs deployment playbooks using Ansible.'
-author: "GBH"
+author: 'gbh-tech'
 
 inputs:
   playbook_path:
@@ -27,7 +27,7 @@ inputs:
     description: 'AWS service account secret access key'
     required: true
   ansible_tags:
-    description: ''
+    description: 'A comma-separated string of tags to filter which tasks to run in the playbook'
     required: true
     default: 'kubeconfig,info'
 
@@ -36,16 +36,16 @@ env:
   PY_COLORS: '1'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-    - name: 🔑 Configure AWS service account credentials
+    - name: Configure AWS service account credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: ${{ inputs.aws_region }}
         aws-access-key-id: ${{ inputs.aws_access_key_id }}
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
 
-    - name: 📦 Install deployment system dependencies
+    - name: Install deployment system dependencies
       shell: bash -leo pipefail {0}
       run:
         pip install --upgrade
@@ -54,7 +54,7 @@ runs:
         awscli
         kubernetes
 
-    - name: 🔧 Set Ansible configuration and dry run options
+    - name: Set Ansible configuration and dry run options
       shell: bash -leo pipefail {0}
       working-directory: ansible
       run: |
@@ -69,12 +69,12 @@ runs:
 
         sed -i "/- hosts:/a\  no_log: yes" playbooks/site.yml
 
-    - name: 🔐 Add Ansible vault password to vault key file
+    - name: Add Ansible vault password to vault key file
       shell: bash -leo pipefail {0}
       working-directory: ansible
       run: echo "${{ inputs.ansible_vault_password }}" > vault.key
 
-    - name: 🚀 Running Ansible tasks
+    - name: Running Ansible tasks
       shell: bash -leo pipefail {0}
       working-directory: ansible
       run: |

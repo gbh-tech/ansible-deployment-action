@@ -4,13 +4,13 @@ This GitHub Action facilitates Ansible deployments, allowing you to run Ansible 
 
 ## Usage
 
-See actions.yml
+See [action.yml](action.yml)
 
 ``` yaml
 - uses: actions/ansible-deployment@v1
   with:
     # Optional. Specifies the path to the playbook
-    playbook_path: './'
+    playbook_path: '.'
 
     # The name of the playbook
     playbook_name: ''
@@ -26,13 +26,13 @@ See actions.yml
     # Example: 'system,deployment,nginx,certbot'
     ansible_tags: ''
 
+    # AWS service account access key
+    aws_access_key_id: ''
+
     # Ensure the following values are treated as secrets:
 
     # Ansible vault password to decrypt secrets
     ansible_vault_password: ''
-
-    # AWS service account access key
-    aws_access_key_id: ''
 
     # AWS service account secret access key
     aws_secret_access_key: ''
@@ -43,7 +43,7 @@ Example usage:
 ```yaml
 - uses: actions/ansible-deployment@v1
   with:
-    playbook_path: 'playbooks/'
+    playbook_path: 'playbooks'
     playbook_name: 'stage.yaml'
     dry_run: true
     aws_region: 'us-east-1'
