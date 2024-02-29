@@ -6,7 +6,7 @@ inputs:
   playbook_path:
     description: 'The location of the playbook'
     required: false
-    default: './'
+    default: '.'
   playbook_name:
     description: 'The playbook file name'
     required: true
