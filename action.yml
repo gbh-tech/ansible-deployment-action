@@ -9,39 +9,40 @@ inputs:
   playbook_path:
     description: 'The location of the playbook'
     required: false
-    default: '.'
+    default: 'playbooks'
   playbook_name:
     description: 'The playbook file name'
     required: true
   ansible_vault_password:
     description: 'Ansible vault password to decrypt secrets'
-    required: true
+    required: false
   dry_run:
     description: 'Whenever to run Ansible on check mode'
     required: false
-    default: 'true'
+    default: 'false'
   aws_region:
     description: 'AWS runner region'
-    required: true
+    required: false
   aws_access_key_id:
     description: 'AWS service account access key'
-    required: true
+    required: false
   aws_secret_access_key:
     description: 'AWS service account secret access key'
-    required: true
+    required: false
   ansible_tags:
     description: 'A comma-separated string of tags to filter which tasks to run in the playbook'
     required: true
     default: 'kubeconfig,info'
-
-env:
-  ANSIBLE_FORCE_COLOR: '1'
-  PY_COLORS: '1'
+  workdir:
+    description: 'The Ansible working directory'
+    required: true
+    default: 'ansible'
 
 runs:
   using: 'composite'
   steps:
     - name: Configure AWS service account credentials
+      if: ${{ inputs.aws_access_key_id != '' }}
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: ${{ inputs.aws_region }}
@@ -59,7 +60,7 @@ runs:
 
     - name: Set Ansible configuration and dry run options
       shell: bash -leo pipefail {0}
-      working-directory: ansible
+      working-directory: ${{ inputs.workdir }}
       run: |
         set_env() { echo "$1" >> $GITHUB_ENV; }
         echo "Dry Run set to: ${{ inputs.dry_run }}"
@@ -70,16 +71,17 @@ runs:
           set_env "OPTS="
         fi
 
-        sed -i "/- hosts:/a\  no_log: yes" playbooks/site.yml
+        sed -i "/- hosts:/a\  no_log: yes" ${{ inputs.playbook_path }}/site.yml
 
     - name: Add Ansible vault password to vault key file
       shell: bash -leo pipefail {0}
-      working-directory: ansible
+      if: ${{ inputs.ansible_vault_password != '' }}
+      working-directory: ${{ inputs.workdir }}
       run: echo "${{ inputs.ansible_vault_password }}" > vault.key
 
     - name: Running Ansible tasks
       shell: bash -leo pipefail {0}
-      working-directory: ansible
+      working-directory: ${{ inputs.workdir }}
       run: |
         tags="${{ inputs.ansible_tags }}"
 

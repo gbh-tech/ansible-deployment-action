@@ -1,0 +1,5 @@
+---
+- name: Authenticate to EKS and update kubeconfig
+  ansible.builtin.command:
+    cmd:
+      echo "Test authentication"

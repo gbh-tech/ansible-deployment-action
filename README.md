@@ -10,13 +10,13 @@ See [action.yml](action.yml)
 - uses: actions/ansible-deployment@v1
   with:
     # Optional. Specifies the path to the playbook
-    playbook_path: '.'
+    playbook_path: 'playbooks'
 
     # The name of the playbook
     playbook_name: ''
 
     # Optional. Set to true to run Ansible playbooks in --check mode
-    dry_run: true
+    dry_run: false
 
     # Specifies the AWS region name for configuration
     aws_region: ''
@@ -26,15 +26,18 @@ See [action.yml](action.yml)
     # Example: 'system,deployment,nginx,certbot'
     ansible_tags: ''
 
-    # AWS service account access key
+    # The ansible working directory
+    workdir: 'ansible'
+
+    # Optional. AWS service account access key
     aws_access_key_id: ''
 
     # Ensure the following values are treated as secrets:
 
-    # Ansible vault password to decrypt secrets
+    # Optional. Ansible vault password to decrypt secrets
     ansible_vault_password: ''
 
-    # AWS service account secret access key
+    # Optional. AWS service account secret access key
     aws_secret_access_key: ''
 ```
 
@@ -45,10 +48,14 @@ Example usage:
   with:
     playbook_path: 'playbooks'
     playbook_name: 'stage.yaml'
+    workdir: 'ansible'
     dry_run: true
     aws_region: 'us-east-1'
-    ansible_tags: 'system,deployment,nginx,certbot'
     ansible_vault_password: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
     aws_access_key_id: ${{ vars.AWS_ACCESS_KEY_ID }}
     aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    ansible_tags: >-
+      auth,
+      env-vars,
+      info
 ```

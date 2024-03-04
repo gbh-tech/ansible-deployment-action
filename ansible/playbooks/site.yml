@@ -1,0 +1,9 @@
+---
+- name: Run deployment playbook
+  hosts: "{{ target }}"
+  gather_facts: false
+  connection: local
+  roles:
+    - role: authentication
+    - role: env_vars
+    - role: info
