@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+env:
+  ANSIBLE_FORCE_COLOR: '1'
+  PY_COLORS: '1'
+  FORCE_COLOR: '1'
+
 jobs:
   deployment_test:
     runs-on: ubuntu-latest

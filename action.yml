@@ -38,11 +38,6 @@ inputs:
     required: true
     default: 'ansible'
 
-env:
-  ANSIBLE_FORCE_COLOR: '1'
-  PY_COLORS: '1'
-  FORCE_COLOR: '1'
-
 runs:
   using: 'composite'
   steps:
