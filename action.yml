@@ -34,7 +34,7 @@ inputs:
     required: true
     default: 'kubeconfig,info'
   workdir:
-    description: 'The ansible working directory'
+    description: 'The Ansible working directory'
     required: true
     default: 'ansible'
 
