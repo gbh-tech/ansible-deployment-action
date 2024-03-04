@@ -10,7 +10,7 @@ See [action.yml](action.yml)
 - uses: actions/ansible-deployment@v1
   with:
     # Optional. Specifies the path to the playbook
-    playbook_path: '.'
+    playbook_path: 'playbooks'
 
     # The name of the playbook
     playbook_name: ''
