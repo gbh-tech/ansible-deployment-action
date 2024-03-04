@@ -1,18 +1,9 @@
-name: 🚢 Deployment Tests
+name: 🚢 Deployment Action Tests
 
 on:
   pull_request:
     branches:
       - main
-
-concurrency:
-  group: '${{ github.workflow }} @ ${{ github.ref }}'
-  cancel-in-progress: true
-
-env:
-  ANSIBLE_FORCE_COLOR: '1'
-  PY_COLORS: '1'
-  FORCE_COLOR: '1'
 
 jobs:
   deployment_test:
@@ -25,9 +16,7 @@ jobs:
         uses: ./
         with:
           dry_run: true
-          aws_region: us-east-1
           playbook_name: 'stage'
-          playbook_path: 'playbooks'
           ansible_tags: >-
             kubeconfig,
             env-vars,
