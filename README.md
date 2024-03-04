@@ -34,7 +34,7 @@ See [action.yml](action.yml)
 
     # Ensure the following values are treated as secrets:
 
-    # Optional.  Ansible vault password to decrypt secrets
+    # Optional. Ansible vault password to decrypt secrets
     ansible_vault_password: ''
 
     # Optional. AWS service account secret access key
