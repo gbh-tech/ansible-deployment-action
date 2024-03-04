@@ -1,0 +1,5 @@
+skip_list:
+  - no-changed-when
+  - name[play]
+  - name[missing]
+  - ignore-errors

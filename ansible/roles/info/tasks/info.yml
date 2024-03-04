@@ -1,0 +1,5 @@
+---
+- name: Test info
+  ansible.builtin.command:
+    cmd:
+      echo "Test info"

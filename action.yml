@@ -15,20 +15,20 @@ inputs:
     required: true
   ansible_vault_password:
     description: 'Ansible vault password to decrypt secrets'
-    required: true
+    required: false
   dry_run:
     description: 'Whenever to run Ansible on check mode'
     required: false
     default: 'false'
   aws_region:
     description: 'AWS runner region'
-    required: true
+    required: false
   aws_access_key_id:
     description: 'AWS service account access key'
-    required: true
+    required: false
   aws_secret_access_key:
     description: 'AWS service account secret access key'
-    required: true
+    required: false
   ansible_tags:
     description: 'A comma-separated string of tags to filter which tasks to run in the playbook'
     required: true
@@ -46,6 +46,7 @@ runs:
   using: 'composite'
   steps:
     - name: Configure AWS service account credentials
+      if: ${{ inputs.aws_access_key_id != '' }}
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: ${{ inputs.aws_region }}
@@ -78,6 +79,7 @@ runs:
 
     - name: Add Ansible vault password to vault key file
       shell: bash -leo pipefail {0}
+      if: ${{ inputs.ansible_vault_password != '' }}
       working-directory: ${{ workdir }}
       run: echo "${{ inputs.ansible_vault_password }}" > vault.key
 

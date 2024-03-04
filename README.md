@@ -29,15 +29,15 @@ See [action.yml](action.yml)
     # The ansible working directory
     workdir: 'ansible'
 
-    # AWS service account access key
+    # Optional. AWS service account access key
     aws_access_key_id: ''
 
     # Ensure the following values are treated as secrets:
 
-    # Ansible vault password to decrypt secrets
+    # Optional.  Ansible vault password to decrypt secrets
     ansible_vault_password: ''
 
-    # AWS service account secret access key
+    # Optional. AWS service account secret access key
     aws_secret_access_key: ''
 ```
 
