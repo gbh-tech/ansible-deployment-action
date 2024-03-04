@@ -9,7 +9,7 @@ inputs:
   playbook_path:
     description: 'The location of the playbook'
     required: false
-    default: '.'
+    default: 'playbooks'
   playbook_name:
     description: 'The playbook file name'
     required: true
@@ -19,7 +19,7 @@ inputs:
   dry_run:
     description: 'Whenever to run Ansible on check mode'
     required: false
-    default: 'true'
+    default: 'false'
   aws_region:
     description: 'AWS runner region'
     required: true
@@ -33,6 +33,10 @@ inputs:
     description: 'A comma-separated string of tags to filter which tasks to run in the playbook'
     required: true
     default: 'kubeconfig,info'
+  workdir:
+    description: 'The ansible working directory'
+    required: true
+    default: 'ansible'
 
 env:
   ANSIBLE_FORCE_COLOR: '1'
@@ -59,7 +63,7 @@ runs:
 
     - name: Set Ansible configuration and dry run options
       shell: bash -leo pipefail {0}
-      working-directory: ansible
+      working-directory: ${{ workdir }}
       run: |
         set_env() { echo "$1" >> $GITHUB_ENV; }
         echo "Dry Run set to: ${{ inputs.dry_run }}"
@@ -74,12 +78,12 @@ runs:
 
     - name: Add Ansible vault password to vault key file
       shell: bash -leo pipefail {0}
-      working-directory: ansible
+      working-directory: ${{ workdir }}
       run: echo "${{ inputs.ansible_vault_password }}" > vault.key
 
     - name: Running Ansible tasks
       shell: bash -leo pipefail {0}
-      working-directory: ansible
+      working-directory: ${{ workdir }}
       run: |
         tags="${{ inputs.ansible_tags }}"
 

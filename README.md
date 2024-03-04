@@ -16,7 +16,7 @@ See [action.yml](action.yml)
     playbook_name: ''
 
     # Optional. Set to true to run Ansible playbooks in --check mode
-    dry_run: true
+    dry_run: false
 
     # Specifies the AWS region name for configuration
     aws_region: ''
@@ -25,6 +25,9 @@ See [action.yml](action.yml)
     # The order of the tags is important
     # Example: 'system,deployment,nginx,certbot'
     ansible_tags: ''
+
+    # The ansible working directory
+    workdir: 'ansible'
 
     # AWS service account access key
     aws_access_key_id: ''
