@@ -64,7 +64,7 @@ runs:
 
     - name: Set Ansible configuration and dry run options
       shell: bash -leo pipefail {0}
-      working-directory: ${{ workdir }}
+      working-directory: ${{ inputs.workdir }}
       run: |
         set_env() { echo "$1" >> $GITHUB_ENV; }
         echo "Dry Run set to: ${{ inputs.dry_run }}"
@@ -75,17 +75,17 @@ runs:
           set_env "OPTS="
         fi
 
-        sed -i "/- hosts:/a\  no_log: yes" ${{ playbook_path }}/site.yml
+        sed -i "/- hosts:/a\  no_log: yes" ${{ inputs.playbook_path }}/site.yml
 
     - name: Add Ansible vault password to vault key file
       shell: bash -leo pipefail {0}
       if: ${{ inputs.ansible_vault_password != '' }}
-      working-directory: ${{ workdir }}
+      working-directory: ${{ inputs.workdir }}
       run: echo "${{ inputs.ansible_vault_password }}" > vault.key
 
     - name: Running Ansible tasks
       shell: bash -leo pipefail {0}
-      working-directory: ${{ workdir }}
+      working-directory: ${{ inputs.workdir }}
       run: |
         tags="${{ inputs.ansible_tags }}"
 
