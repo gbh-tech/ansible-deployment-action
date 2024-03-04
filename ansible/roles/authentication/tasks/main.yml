@@ -1,4 +1,4 @@
 ---
-- ansible.builtin.import_tasks: kubeconfig.yml
+- ansible.builtin.import_tasks: auth.yml
   tags:
     - auth
