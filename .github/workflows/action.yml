@@ -18,6 +18,6 @@ jobs:
           dry_run: true
           playbook_name: 'stage'
           ansible_tags: >-
-            kubeconfig,
+            auth,
             env-vars,
             info

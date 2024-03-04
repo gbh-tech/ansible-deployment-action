@@ -48,10 +48,14 @@ Example usage:
   with:
     playbook_path: 'playbooks'
     playbook_name: 'stage.yaml'
+    workdir: 'ansible'
     dry_run: true
     aws_region: 'us-east-1'
-    ansible_tags: 'system,deployment,nginx,certbot'
     ansible_vault_password: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
     aws_access_key_id: ${{ vars.AWS_ACCESS_KEY_ID }}
     aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    ansible_tags: >-
+      auth,
+      env-vars,
+      info
 ```
