@@ -93,10 +93,7 @@ runs:
         # Set the IFS to comma (,) to split the string based on comma
         IFS=','
 
-        read -ra array <<< "${tags}"
-        for tag in "${array[@]}"; do
-          ansible-playbook \
-          "${{ inputs.playbook_path }}/${{ inputs.playbook_name }}.yml" \
-          -t "${tag}" \
-          "${{ env.OPTS }}"
+        read -ra array <<< "$tags"
+        for tag in ${array[@]}; do
+          ansible-playbook ${{ inputs.playbook_path }}/${{ inputs.playbook_name }}.yml -t $tag ${{ env.OPTS }}
         done
