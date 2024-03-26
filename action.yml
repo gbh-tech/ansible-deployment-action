@@ -20,6 +20,9 @@ inputs:
     description: 'Whenever to run Ansible on check mode'
     required: false
     default: 'false'
+  no_log:
+    description: 'Whether to log the output of the Playbook'
+    default: 'true'
   aws_region:
     description: 'AWS runner region'
     required: false
@@ -60,36 +63,40 @@ runs:
 
     - name: Set Ansible configuration and dry run options
       shell: bash -leo pipefail {0}
-      working-directory: ${{ inputs.workdir }}
+      working-directory: '${{ inputs.workdir }}'
       run: |
         set_env() { echo "$1" >> $GITHUB_ENV; }
         echo "Dry Run set to: ${{ inputs.dry_run }}"
 
-        if [ "${{ inputs.dry_run }}" == "true" ]; then
+        if [[ "${{ inputs.dry_run }}" == "true" ]]; then
           set_env "OPTS=--check"
         else
           set_env "OPTS="
         fi
 
-        sed -i "/- hosts:/a\  no_log: yes" ${{ inputs.playbook_path }}/site.yml
+        if [[ "${{ inputs.no_log }}" == "true" ]]; then
+          sed -i "/- hosts:/a\  no_log: true" ${{ inputs.playbook_path }}/site.yml
+        fi
 
     - name: Add Ansible vault password to vault key file
       shell: bash -leo pipefail {0}
       if: ${{ inputs.ansible_vault_password != '' }}
-      working-directory: ${{ inputs.workdir }}
+      working-directory: '${{ inputs.workdir }}'
       run: echo "${{ inputs.ansible_vault_password }}" > vault.key
 
     - name: Running Ansible tasks
       shell: bash -leo pipefail {0}
-      working-directory: ${{ inputs.workdir }}
+      working-directory: '${{ inputs.workdir }}'
       run: |
         tags="${{ inputs.ansible_tags }}"
 
         # Set the IFS to comma (,) to split the string based on comma
         IFS=','
 
-        read -ra array <<< "$tags"
-        for tag in ${array[@]}
-          do
-            ansible-playbook ${{ inputs.playbook_path }}/${{ inputs.playbook_name }}.yml -t $tag ${{ env.OPTS }}
-          done
+        read -ra array <<< "${tags}"
+        for tag in "${array[@]}"; do
+          ansible-playbook \
+          "${{ inputs.playbook_path }}/${{ inputs.playbook_name }}.yml" \
+          -t "${tag}" \
+          "${{ env.OPTS }}"
+        done
