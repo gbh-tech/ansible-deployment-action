@@ -59,7 +59,7 @@ runs:
         ansible
         ansible-lint
         awscli
-        kubernetes
+        kubernetes==31.0.0
 
     - name: Set Ansible configuration and dry run options
       shell: bash -leo pipefail {0}
